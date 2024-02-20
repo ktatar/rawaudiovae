@@ -14,4 +14,6 @@ The tutorial.ipynb uses a trained self-organizing map as well. The training of S
 This code is built within the following research residency:
 https://kivanctatar.com/Coding-Latent-No-1
 
+We have a paper on this work published at the Sound and Music Conference 2023: https://arxiv.org/pdf/2305.15571
+
 This work was partially supported by the Wallenberg AI, Autonomous Systems and Software Program – Humanities and Society (WASP-HS) funded by the Marianne and Marcus Wallenberg Foundation and the Marcus and Amalia Wallenberg Foundation.
