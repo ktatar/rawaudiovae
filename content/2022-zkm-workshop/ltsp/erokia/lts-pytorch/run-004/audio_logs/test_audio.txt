@@ -1,0 +1,8 @@
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\472939__erokia__msfxp-sound-58.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\473092__erokia__msfxp-sound-49.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\473238__erokia__msfxp-sound-511.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\481212__erokia__msfxp2-130.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\481228__erokia__msfxp2-229.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\481463__erokia__msfxp2-329.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\481474__erokia__msfxp2-355.wav
+D:\datasets\Audio\latent-timbre-synthesis-pytorch\erokia\test_audio\481546__erokia__msfxp2-377.wav
