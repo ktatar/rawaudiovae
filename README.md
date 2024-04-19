@@ -1,5 +1,7 @@
 # rawaudiovae
 
+Tested with torch 2.0.1.
+
 Check out tutorial.ipynb for testing a trained model. You can download a dataset with trained models here: 
     https://drive.google.com/file/d/1e_X2Ir26iypSdSa6pRCJBy2q5t9zXFBb
 
