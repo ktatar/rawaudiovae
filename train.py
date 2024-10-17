@@ -26,6 +26,8 @@ import json
 import matplotlib.pyplot as plt
 import pdb
 
+from torch.utils.tensorboard import SummaryWriter 
+
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default ='./default.ini' , help='path to the config file')
