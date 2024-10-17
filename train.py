@@ -147,8 +147,10 @@ os.makedirs(checkpoint_dir, exist_ok=True)
 log_dir = workdir / 'logs'
 os.makedirs(log_dir, exist_ok=True)
 
-if generate_test:
+# Logging
+writer = SummaryWriter(log_dir=log_dir)
 
+if generate_test:
   test_dataset, audio_log_dir = init_test_audio(workdir, test_audio, dataset_test_audio, sampling_rate, segment_length)
   test_dataloader = DataLoader(test_dataset, batch_size = batch_size, shuffle=False)
 
