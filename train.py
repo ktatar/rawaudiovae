@@ -70,6 +70,7 @@ learning_rate = config['training'].getfloat('learning_rate')
 batch_size = config['training'].getint('batch_size')
 checkpoint_interval = config['training'].getint('checkpoint_interval')
 save_best_model_after = config['training'].getint('save_best_model_after')
+device = config['training'].get('loss_reduction')
 
 # Model configs
 latent_dim = config['VAE'].getint('latent_dim')
