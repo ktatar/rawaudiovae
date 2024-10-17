@@ -70,7 +70,10 @@ learning_rate = config['training'].getfloat('learning_rate')
 batch_size = config['training'].getint('batch_size')
 checkpoint_interval = config['training'].getint('checkpoint_interval')
 save_best_model_after = config['training'].getint('save_best_model_after')
-device = config['training'].get('loss_reduction')
+loss_reduction = config['training'].get('reduction')
+
+if loss_reduction != 'sum' or loss_reduction != 'mean':
+  raise ValueError("loss_reduction config can be set to either 'mean' or 'sum'. {} is not applicable. Update the config file accordingly.".format(loss_reduction))
 
 # Model configs
 latent_dim = config['VAE'].getint('latent_dim')
@@ -180,7 +183,7 @@ for epoch in range(epochs):
     data = data.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(data)
-    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length, reduction)
+    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length, loss_reduction)
     
     # Log batch loss
     writer.add_scalar('Loss/Batch', loss.item(), epoch * len(training_dataloader) + i)  #🪵 Log batch loss
@@ -192,11 +195,19 @@ for epoch in range(epochs):
     # Log learning rate
     writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], epoch * len(training_dataloader) + i)  #🪵 Log learning rate
   
-  print('====> Epoch: {} - Total loss: {} - Average loss: {:.9f}'.format(
-          epoch, train_loss, train_loss / len(training_dataset)))
-  
-  writer.add_scalar('Loss/train', train_loss, epoch) # 🪵Log the average loss 
+  if loss_reduction == 'sum':
+    print('====> Epoch: {} - Total loss: {} - Average loss: {:.9f}'.format(epoch, train_loss, train_loss / len(training_dataset)))
+    writer.add_scalar('Loss/train_total', train_loss, epoch) # 🪵Log the loss 
+    writer.add_scalar('Loss/train_average', train_loss / len(training_dataset), epoch) # 🪵Log the loss 
 
+  elif loss_reduction =='mean':
+    print('====> Epoch: {} - Average loss: {:.9f}'.format(epoch, train_loss))
+    writer.add_scalar('Loss/train_average', train_loss, epoch) # 🪵Log the loss 
+
+  for name, param in model.named_parameters():
+    writer.add_histogram(name, param, epoch)
+
+  # TensorBoard_ModelParameter
   if epoch % checkpoint_interval == 0 and epoch != 0: 
     print('Checkpoint - Epoch {}'.format(epoch))
     state = {
@@ -225,7 +236,10 @@ for epoch in range(epochs):
       test_predictions_np = test_predictions.view(-1).cpu().numpy()
       sf.write( audio_out, test_predictions_np, sampling_rate)
       print('Audio examples generated: {}'.format(audio_out))
-    
+      
+      #TensorBoard_ReconstructedAudio #kelsey/addition
+      writer.add_audio('Reconstructed Audio', test_predictions_np, epoch, sample_rate=sampling_rate)
+
     torch.save(state, checkpoint_dir.joinpath('ckpt_{:05d}'.format(epoch)))
   
     if (train_loss < train_loss_prev) and (epoch > save_best_model_after):
@@ -290,3 +304,5 @@ else:
 
 with open(config_path, 'w') as configfile:
   config.write(configfile)
+
+writer.close()
