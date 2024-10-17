@@ -179,14 +179,23 @@ for epoch in range(epochs):
     data = data.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(data)
-    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length)
+    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length, reduction)
+    
+    # Log batch loss
+    writer.add_scalar('Loss/Batch', loss.item(), epoch * len(training_dataloader) + i)  #🪵 Log batch loss
+    
     loss.backward()
     train_loss += loss.item()
     optimizer.step()
+
+    # Log learning rate
+    writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], epoch * len(training_dataloader) + i)  #🪵 Log learning rate
   
   print('====> Epoch: {} - Total loss: {} - Average loss: {:.9f}'.format(
           epoch, train_loss, train_loss / len(training_dataset)))
   
+  writer.add_scalar('Loss/train', train_loss, epoch) # 🪵Log the average loss 
+
   if epoch % checkpoint_interval == 0 and epoch != 0: 
     print('Checkpoint - Epoch {}'.format(epoch))
     state = {
@@ -227,7 +236,7 @@ for epoch in range(epochs):
       best_loss = train_loss
 
     elif (train_loss > train_loss_prev):
-      print("Average loss did not improve.")
+      print("Loss did not improve.")
   
   final_loss = train_loss
 
