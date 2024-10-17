@@ -35,8 +35,8 @@ class VAE(nn.Module):
       return self.decode(z), mu, logvar
 
 # Reconstruction + KL divergence losses summed over all elements and batch
-def loss_function(recon_x, x, mu, logvar, kl_beta, segment_length):
-  recon_loss = F.mse_loss(recon_x, x.view(-1, segment_length))
+def loss_function(recon_x, x, mu, logvar, kl_beta, segment_length, reduction):
+  recon_loss = F.mse_loss(recon_x, x.view(-1, segment_length)) # mse_loss default is mean
 
   # see Appendix B from VAE paper:
   # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
