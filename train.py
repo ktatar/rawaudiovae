@@ -70,10 +70,6 @@ learning_rate = config['training'].getfloat('learning_rate')
 batch_size = config['training'].getint('batch_size')
 checkpoint_interval = config['training'].getint('checkpoint_interval')
 save_best_model_after = config['training'].getint('save_best_model_after')
-loss_reduction = config['training'].get('reduction')
-
-if loss_reduction != 'sum' or loss_reduction != 'mean':
-  raise ValueError("loss_reduction config can be set to either 'mean' or 'sum'. {} is not applicable. Update the config file accordingly.".format(loss_reduction))
 
 # Model configs
 latent_dim = config['VAE'].getint('latent_dim')
@@ -183,7 +179,7 @@ for epoch in range(epochs):
     data = data.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(data)
-    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length, loss_reduction)
+    loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length)
     
     # Log batch loss
     writer.add_scalar('Loss/Batch', loss.item(), epoch * len(training_dataloader) + i)  #🪵 Log batch loss
@@ -195,14 +191,9 @@ for epoch in range(epochs):
     # Log learning rate
     writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], epoch * len(training_dataloader) + i)  #🪵 Log learning rate
   
-  if loss_reduction == 'sum':
-    print('====> Epoch: {} - Total loss: {} - Average loss: {:.9f}'.format(epoch, train_loss, train_loss / len(training_dataset)))
-    writer.add_scalar('Loss/train_total', train_loss, epoch) # 🪵Log the loss 
-    writer.add_scalar('Loss/train_average', train_loss / len(training_dataset), epoch) # 🪵Log the loss 
-
-  elif loss_reduction =='mean':
-    print('====> Epoch: {} - Average loss: {:.9f}'.format(epoch, train_loss))
-    writer.add_scalar('Loss/train_average', train_loss, epoch) # 🪵Log the loss 
+  print('====> Epoch: {} - Total loss: {} - Average loss: {:.9f}'.format(epoch, train_loss, train_loss / len(training_dataset)))
+  writer.add_scalar('Loss/train_total', train_loss, epoch) # 🪵Log the loss 
+  writer.add_scalar('Loss/train_average', train_loss / len(training_dataset), epoch) # 🪵Log the loss 
 
   for name, param in model.named_parameters():
     writer.add_histogram(name, param, epoch)
