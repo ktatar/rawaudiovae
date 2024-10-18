@@ -75,7 +75,6 @@ save_best_model_after = config['training'].getint('save_best_model_after')
 latent_dim = config['VAE'].getint('latent_dim')
 n_units = config['VAE'].getint('n_units')
 kl_beta = config['VAE'].getfloat('kl_beta')
-device = config['VAE'].get('device')
 
 # etc
 example_length = config['extra'].getint('example_length')
@@ -86,7 +85,7 @@ desc = config['extra'].get('description')
 start_time = time.time()
 config['extra']['start'] = time.asctime( time.localtime(start_time) )
 
-device = torch.device(device)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device_name = torch.cuda.get_device_name()
 print('Device: {}'.format(device_name))
 config['VAE']['device_name'] = device_name
