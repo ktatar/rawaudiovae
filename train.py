@@ -155,8 +155,11 @@ if generate_test:
   test_dataloader = DataLoader(test_dataset, batch_size = batch_size, shuffle=False)
 
 # Neural Network
+if device == "cuda":
+  model = VAE(segment_length, n_units, latent_dim).to(device)
+else:
+  model = VAE(segment_length, n_units, latent_dim)
 
-model = VAE(segment_length, n_units, latent_dim).to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 # Some dummy variables to keep track of loss situation
@@ -176,7 +179,8 @@ for epoch in range(epochs):
   for i, data in enumerate(training_dataloader):
     
     # data, = data
-    data = data.to(device)
+    if device == "cuda":
+      data = data.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(data)
     loss = loss_function(recon_batch, data, mu, logvar, kl_beta, segment_length)
@@ -213,7 +217,8 @@ for epoch in range(epochs):
       
       for iterno, test_sample in enumerate(test_dataloader):
         with torch.no_grad():
-          test_sample = test_sample.to(device)
+          if device == cuda:
+            test_sample = test_sample.to(device)
           test_pred = model(test_sample)[0]
         
         if init_test:
@@ -259,7 +264,8 @@ if generate_test:
   
   for iterno, test_sample in enumerate(test_dataloader):
     with torch.no_grad():
-      test_sample = test_sample.to(device)
+      if device == "cuda"
+        test_sample = test_sample.to(device)
       test_pred = model(test_sample)[0]
   
     if init_test:
