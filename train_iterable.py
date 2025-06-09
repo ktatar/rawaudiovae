@@ -67,12 +67,12 @@ if not dataset_test_audio.exists():
 generate_test = config['dataset'].get('generate_test')    
 
 # Training configs
-total_num_batches = config['training'].getint('total_num_batches')
+total_num_frames = config['training'].getint('total_num_frames')
 learning_rate = config['training'].getfloat('learning_rate')
 batch_size = config['training'].getint('batch_size')
 checkpoint_interval = config['training'].getint('checkpoint_interval')
 save_best_model_after = config['training'].getint('save_best_model_after')
-
+total_num_batches = int(total_num_frames / batch_size)
 # Model configs
 latent_dim = config['VAE'].getint('latent_dim')
 n_units = config['VAE'].getint('n_units')
