@@ -71,7 +71,6 @@ total_num_frames = config['training'].getint('total_num_frames')
 learning_rate = config['training'].getfloat('learning_rate')
 batch_size = config['training'].getint('batch_size')
 checkpoint_interval = config['training'].getint('checkpoint_interval')
-save_best_model_after = config['training'].getint('save_best_model_after')
 total_num_batches = int(total_num_frames / batch_size)
 # Model configs
 latent_dim = config['VAE'].getint('latent_dim')
@@ -237,7 +236,7 @@ for data in islice(training_dataloader, total_num_batches):
   
     torch.save(state, checkpoint_dir.joinpath('ckpt_{:05d}'.format(batch_id)))
   
-    if (train_loss < train_loss_prev) and (batch_id > save_best_model_after):
+    if (train_loss < train_loss_prev):
       
       save_path = workdir.joinpath('model').joinpath('best_model.pt')
       torch.save(model, save_path)
@@ -305,7 +304,5 @@ else:
 
 with open(config_path, 'w') as configfile:
   config.write(configfile)
-
-
 
 writer.close()
