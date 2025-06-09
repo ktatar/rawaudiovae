@@ -1,8 +1,73 @@
 import torch
 import librosa
+from torch.utils.data import IterableDataset
 
 from pathlib import Path
 import numpy as np
+from itertools import chain, cycle
+
+class IterableAudioDataset(IterableDataset):
+    """
+    This is the main class that calculates the streams CQT spectrogram frames
+
+    # Iterable Dataset class structure source:
+    Source: https://medium.com/speechmatics/how-to-build-a-streaming-dataloader-with-pytorch-a66dd891d9dd
+
+    The current loading mechanism shuffles the audio file list, but not the audio windows. 
+    
+    """
+
+    def __init__(self, audio_folder, sampling_rate, hop_size, dtype, device, shuffle = True):
+        
+        self.sampling_rate = sampling_rate
+        self.hop_size = hop_size
+        self.dtype = dtype
+        self.device = device
+        self.shuffle = shuffle
+
+        if isinstance(audio_folder, pathlib.PurePath):
+            self.audio_folder = audio_folder
+        else: 
+            self.audio_folder = Path(audio_folder)
+
+        self.audio_file_list = [f for f in audio_folder.glob('*.wav')]
+        self.num_files = len(self.audio_file_list)
+
+    @property
+    def shuffled_data_list(self):
+        # This is a workaround for shuffling. We only shuffle the audio file list
+        # MAKE SURE THE DATALOADER IN THE TRAINING SCRIPT IS SHUFFLE FALSE.
+        return random.sample(self.audio_file_list, len(self.audio_file_list))
+
+    def process_data(self, audio_file):
+        
+        # torchaudio.load with multichannel. Let's use all channels as content for training
+        audio_np, audio_sr = torchaudio.load(audio_file)
+
+        # Check if the file sampling rate is different than the config sampling_rate. This is done because librosa loads slower if sr != None above.
+        if audio_sr != self.sampling_rate:
+            audio_np = torchaudio.functional.resample(audio_np, audio_sr, self.sampling_rate)
+
+        # Pad if the length is not a multiplier of hop_size
+        if audio_np.shape[1] % self.hop_size != 0:
+            num_zeros = self.hop_size - (audio_np.shape[1] % self.hop_size)
+            audio_np = torch.nn.functional.pad(audio_np, (0, num_zeros), 'constant')            
+        
+        # Check if we are using cuda then move the audio to cuda
+        if self.device.type == "cuda":
+            audio_np = audio_np.to(self.device)
+
+        for frame in audio_np:
+            yield frame
+
+    def get_stream(self, audio_file_list):
+        return chain.from_iterable(map(self.process_data, cycle(audio_file_list)))
+        
+    def __iter__(self):
+        if self.shuffle:
+            return self.get_stream(self.shuffled_data_list)
+        else: 
+            return self.get_stream(self.audio_file_list)
 
 class AudioDataset(torch.utils.data.Dataset):
     """
